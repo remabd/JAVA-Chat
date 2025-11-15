@@ -6,12 +6,14 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 
+import chat.ClientThread;
+
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
 public class Main {
-  // private static ArrayList<Socket> clients = new ArrayList<>();
+  public static ArrayList<ClientThread> clients = new ArrayList<>();
 
   public static void main(String[] args) {
     int port = 5156;
@@ -21,10 +23,9 @@ public class Main {
 
       while (true) {
         try {
-          ClientController clientController = new ClientController();
           Socket client = server.accept();
-          ClientThread clientThread = new ClientThread(client, clientController);
-          clientController.addThread(clientThread);
+          ClientThread clientThread = new ClientThread(client);
+          Main.clients.add(clientThread);
           clientThread.start();
         } catch (IOException e) {
           e.printStackTrace();
@@ -36,8 +37,4 @@ public class Main {
       e.printStackTrace();
     }
   }
-
-  // public ArrayList<Socket> getClients() {
-  // return clients;
-  // }
 }

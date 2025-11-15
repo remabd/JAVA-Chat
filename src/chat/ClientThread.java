@@ -13,12 +13,15 @@ public class ClientThread extends Thread {
   private String name;
   private BufferedReader bs;
   private DataOutputStream outchan;
-  private ClientController clientController;
+  // private ClientController clientController;
+  public static final String CLEAR_LINE = "\033[2K"; // Clear entire line
+  public static final String CURSOR_UP = "\033[1A"; // Move cursor up 1 line
+  public static final String CURSOR_START = "\r"; // Return to start of line
 
-  public ClientThread(Socket s, ClientController cc) {
+  public ClientThread(Socket s) {
     this.client = s;
     this.name = "";
-    this.clientController = cc;
+    // this.clientController = cc;
   }
 
   private void initialize() {
@@ -50,32 +53,27 @@ public class ClientThread extends Thread {
       String line;
       do {
         line = this.bs.readLine();
-        this.outchan.writeChars("OK: " + line + "\n");
-        this.display(line);
+        this.sendMessage(line);
+        System.out.print(CURSOR_UP + CURSOR_START + CLEAR_LINE);
         System.out.println(line);
       } while (line != "exit");
-
       client.close();
-
     } catch (IOException e) {
       e.printStackTrace();
     }
   }
 
+  private void sendMessage(String line) {
+    String message = this.name + ": " + line + "\n";
+    Main.clients.stream().forEach(client -> client.display(message));
+    System.out.println(message);
+  }
+
   public void display(String message) {
-    System.out.println("Into display: " + message);
     try {
       this.outchan.writeChars(message);
     } catch (IOException e) {
       e.printStackTrace();
     }
-  }
-
-  public Socket getClient() {
-    return this.client;
-  }
-
-  public boolean equals(ClientThread ct) {
-    return this.client.equals(ct.getClient());
   }
 }
